@@ -54,11 +54,12 @@ component extends="org.fw1.framework" output="false" {
 	variables.framework.SESOmitIndex = true;
 	variables.framework.reload = "reload";
 	
+	/*
 	include "../../config/applicationSettings.cfm";
 	include "../../config/mappings.cfm";
 	include "../mappings.cfm";
+	*/
 	
-	/*
 	// If we are installed inside of mura, then use the core application settings, otherwise use standalone settings
 	if( fileExists(expandPath("../../config/applicationSettings.cfm")) ) {
 		
@@ -91,7 +92,7 @@ component extends="org.fw1.framework" output="false" {
 		this.ormSettings.logsql = false;
 		
 	}
-	*/
+	
 	
 	this.mappings[ "/slatwallVfsRoot" ] = "ram:///" & this.name;
 	
