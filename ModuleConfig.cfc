@@ -1,17 +1,27 @@
-<!-----------------------------------------------------------------------
+/**
 ********************************************************************************
-Copyright Since 2005 ColdBox Framework by Luis Majano and Ortus Solutions, Corp
-www.coldbox.org | www.luismajano.com | www.ortussolutions.com
+ContentBox - A Modular Content Platform
+Copyright 2012 by Luis Majano and Ortus Solutions, Corp
+www.gocontentbox.org | www.luismajano.com | www.ortussolutions.com
 ********************************************************************************
+Apache License, Version 2.0
 
-Author 	 :	Luis Majano
-Date     :	January 10, 2010
-Description :
-The forgebox manager handler
+Copyright Since [2012] [Luis Majano and Ortus Solutions,Corp]
 
------------------------------------------------------------------------>
-<cfcomponent output="false" hint="My App Configuration">
-<cfscript>
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+********************************************************************************
+*/
+component hint="My Module Configuration"{
 /**
 Module Directives as public properties
 this.title 				= "Title of the module";
@@ -34,9 +44,9 @@ structures to create for configuration
 - interceptorSettings : struct of the following keys ATM
 	- customInterceptionPoints : string list of custom interception points
 - interceptors : array
-- routes : array Allowed keys are same as the addRoute() method of the SES interceptor.
 - layoutSettings : struct (will allow to define a defaultLayout for the module)
-- modelMappings : structure of model mappings. Allowed keys are the alias and path, same as normal model mappings.
+- routes : array Allowed keys are same as the addRoute() method of the SES interceptor.
+- wirebox : The wirebox DSL to load and use
 
 Available objects in variable scope
 - controller
@@ -44,7 +54,7 @@ Available objects in variable scope
 - moduleMapping (include,cf path)
 - modulePath (absolute path)
 - log (A pre-configured logBox logger object for this object)
-- binder (The wirebox instance binder for DI configuration)
+- binder (The wirebox configuration binder)
 
 Required Methods
 - configure() : The method ColdBox calls to configure the module.
@@ -57,47 +67,102 @@ Optional Methods
 
 	// Module Properties
 	this.title 				= "Slatwall Connector";
-	this.author 			= "Greg Moser";
-	this.webURL 			= "http://www.getSlatwall.com";
-	this.description 		= "A module that connects to Slatwall";
+	this.author 			= "ten24 Web Solutions";
+	this.webURL 			= "http://www.getslatwall.com";
+	this.description 		= "This is a connector application for Slatwall";
 	this.version			= "1.0";
+	// If true, looks for views in the parent first, if not found, then in the module. Else vice-versa
 	this.viewParentLookup 	= true;
+	// If true, looks for layouts in the parent first, if not found, then in module. Else vice-versa
 	this.layoutParentLookup = true;
-	//this.entryPoint			= "/firstcboxapp/modules/slatwall-connector/Slatwall/";
+	// Module Entry Point
+	this.entryPoint			= "slatwall-connector";
 
-	/**
-	* Configure the ForgeBox Module
-	*/
 	function configure(){
-		settings = {
-			version = this.version
+
+		// parent settings
+		parentSettings = {
+
 		};
-/*
+
+		// module settings - stored in modules.name.settings
+		settings = {
+
+		};
+
 		// Layout Settings
 		layoutSettings = {
-			defaultLayout = "forgebox.main.cfm"
+			defaultLayout = ""
 		};
-	
+
+		// datasources
+		datasources = {
+
+		};
+
+		// web services
+		webservices = {
+
+		};
+
 		// SES Routes
 		routes = [
-			"config/routes.cfm"
+			// Module Entry Point
+			{pattern="/", handler="home",action="index"},
+			// Convention Route
+			{pattern="/:handler/:action?"}
 		];
 
-		// WireBox Binder configuration
-		binder.map("forgeService@forgebox").to("#moduleMapping#.model.ForgeService");
-*/
+		// Custom Declared Points
+		interceptorSettings = {
+			customInterceptionPoints = ""
+		};
+
+		// Custom Declared Interceptors
+		interceptors = [
+		];
+
+		// Binder Mappings
+		// binder.map("Alias").to("#moduleMapping#.model.MyService");
+
 	}
 
 	/**
-	* Called when the module is activated and application has loaded
+	* Fired when the module is registered and activated.
 	*/
 	function onLoad(){
 		/*
-		// change entry point if SES loaded	
-		if( NOT controller.settingExists("sesBaseURL") ){
-			controller.getSetting("modules").forgebox.entryPoint = "forgebox:manager.index";
-		}
-			*/		
+		// Let's add ourselves to the main menu in the Modules section
+		var menuService = controller.getWireBox().getInstance("AdminMenuService@cb");
+		// Add Menu Contribution
+		menuService.addSubMenu(topMenu=menuService.MODULES,name="HelloContentBox",label="Hello ContentBox",href="#menuService.buildModuleLink('helloContentBox','home')#");
+		*/
 	}
-</cfscript>
-</cfcomponent>
+
+	/**
+	* Fired when the module is activated by ContentBox
+	*/
+	function onActivate(){
+
+	}
+
+	/**
+	* Fired when the module is unregistered and unloaded
+	*/
+	function onUnload(){
+		/*
+		// Let's remove ourselves to the main menu in the Modules section
+		var menuService = controller.getWireBox().getInstance("AdminMenuService@cb");
+		// Remove Menu Contribution
+		menuService.removeSubMenu(topMenu=menuService.MODULES,name="HelloContentBox");
+		*/
+	}
+
+	/**
+	* Fired when the module is deactivated by ContentBox
+	*/
+	function onDeactivate(){
+
+	}
+
+}
