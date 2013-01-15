@@ -80,50 +80,8 @@ Optional Methods
 
 	function configure(){
 
-		// parent settings
-		parentSettings = {
-
-		};
-
-		// module settings - stored in modules.name.settings
-		settings = {
-
-		};
-
-		// Layout Settings
-		layoutSettings = {
-			defaultLayout = ""
-		};
-
-		// datasources
-		datasources = {
-
-		};
-
-		// web services
-		webservices = {
-
-		};
-
-		// SES Routes
-		routes = [
-			// Module Entry Point
-			{pattern="/", handler="home",action="index"},
-			// Convention Route
-			{pattern="/:handler/:action?"}
-		];
-
-		// Custom Declared Points
-		interceptorSettings = {
-			customInterceptionPoints = ""
-		};
-
-		// Custom Declared Interceptors
-		interceptors = [
-		];
-
 		// Binder Mappings
-		// binder.map("Alias").to("#moduleMapping#.model.MyService");
+		binder.map("slatwall").to("#moduleMapping#.Slatwall.Application").asSingleton();
 
 	}
 
@@ -131,38 +89,55 @@ Optional Methods
 	* Fired when the module is registered and activated.
 	*/
 	function onLoad(){
-		/*
-		// Let's add ourselves to the main menu in the Modules section
-		var menuService = controller.getWireBox().getInstance("AdminMenuService@cb");
-		// Add Menu Contribution
-		menuService.addSubMenu(topMenu=menuService.MODULES,name="HelloContentBox",label="Hello ContentBox",href="#menuService.buildModuleLink('helloContentBox','home')#");
-		*/
+		
 	}
 
-	/**
-	* Fired when the module is activated by ContentBox
-	*/
-	function onActivate(){
-
+	function preProcess( required any event, required struct interceptData  ) {
+		var slatwall = wireBox.getInstance("slatwall");
+		 
+		slatwall.setupGlobalRequest();
+		
+		var prc = event.getCollection(private=true);
+		
+		if(!structKeyExists(prc, "$")) {
+			prc.$ = {};
+		}
+		prc.$.slatwall = slatwall.getSlatwallScope();
 	}
-
-	/**
-	* Fired when the module is unregistered and unloaded
+	
+	/*
+	* Renderer helper injection
 	*/
-	function onUnload(){
-		/*
-		// Let's remove ourselves to the main menu in the Modules section
-		var menuService = controller.getWireBox().getInstance("AdminMenuService@cb");
-		// Remove Menu Contribution
-		menuService.removeSubMenu(topMenu=menuService.MODULES,name="HelloContentBox");
-		*/
+	function afterPluginCreation(event,interceptData){
+		
+		var prc = event.getCollection(private=true);
+		
+		
+		// check for renderer
+		if( isInstanceOf(arguments.interceptData.oPlugin,"coldbox.system.plugins.Renderer") ){
+			
+			var slatwall = wireBox.getInstance("slatwall");
+			
+			if(!structKeyExists(arguments.interceptData.oPlugin, "$")) {
+				arguments.interceptData.oPlugin.$ = {};	
+			}
+			
+			// decorate it
+			arguments.interceptData.oPlugin.$.slatwall = slatwall.getSlatwallScope();
+			arguments.interceptData.oPlugin.$slatwallInject = variables.$cbInject;
+			arguments.interceptData.oPlugin.$slatwallInject();
+			
+			// announce event
+			announceInterception("cbui_onRendererDecoration",{renderer=arguments.interceptData.oPlugin,CBHelper=arguments.interceptData.oPlugin.cb});
+		}
+	
 	}
-
+	
 	/**
-	* Fired when the module is deactivated by ContentBox
+	* private inject
 	*/
-	function onDeactivate(){
-
+	function $slatwallInject(){
+		variables.$ = this.$;
 	}
 
 }
