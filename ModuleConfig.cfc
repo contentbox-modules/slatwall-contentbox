@@ -77,32 +77,52 @@ Optional Methods
 	this.layoutParentLookup = true;
 	// Module Entry Point
 	this.entryPoint			= "slatwall-connector";
+	
+	this.slatwallInstalled	= false;
+	this.slatwallConfigured	= false;
+	this.slatwall = "";
 
 	function configure(){
 
-		// Binder Mappings
-		binder.map("slatwall").to("#moduleMapping#.Slatwall.Application").asSingleton();
-
+		
 	}
+	
 
 	/**
 	* Fired when the module is registered and activated.
 	*/
 	function onLoad(){
-		
+		application.slatwall.initialized = false;
+		if(getSlatwallConfiguredFlag() && not getSlatwallInstalledFlag()) {
+			appMeta = getAppMeta();
+			
+			if(isStruct(appMeta.datasource) && structKeyExists(appMeta.datasource, "name")) {
+				var ds = appMeta.datasource.name;	
+			} else {
+				var ds = appMeta.datasource;
+			}
+			
+			var slatwallSetup = new model.SlatwallSetup();	
+			slatwallSetup.setupSlatwall(moduleDirectoryPath=getDirectoryFromPath(getCurrentTemplatePath()), applicationName=appMeta.name, applicationDatasource=ds);
+			
+		}
+		if(getSlatwallInstalledFlag()) {
+			binder.map("slatwall").toValue(new Slatwall.Application());
+		}
 	}
 
 	function preProcess( required any event, required struct interceptData  ) {
-		var slatwall = wireBox.getInstance("slatwall");
-		 
-		slatwall.setupGlobalRequest();
-		
-		var prc = event.getCollection(private=true);
-		
-		if(!structKeyExists(prc, "$")) {
-			prc.$ = {};
+		if(getSlatwallConfiguredFlag() && getSlatwallInstalledFlag()) {
+			var slatwall = controller.getWireBox().getInstance("slatwall");
+			
+			slatwall.setupGlobalRequest();
+			var prc = event.getCollection(private=true);
+			
+			if(!structKeyExists(prc, "$")) {
+				prc.$ = {};
+			}
+			prc.$.slatwall = slatwall.getSlatwallScope();	
 		}
-		prc.$.slatwall = slatwall.getSlatwallScope();
 	}
 	
 	/*
@@ -110,27 +130,25 @@ Optional Methods
 	*/
 	function afterPluginCreation(event,interceptData){
 		
-		var prc = event.getCollection(private=true);
-		
-		
-		// check for renderer
-		if( isInstanceOf(arguments.interceptData.oPlugin,"coldbox.system.plugins.Renderer") ){
+		if(getSlatwallConfiguredFlag() && getSlatwallInstalledFlag()) {
+			var prc = event.getCollection(private=true);
 			
-			var slatwall = wireBox.getInstance("slatwall");
-			
-			if(!structKeyExists(arguments.interceptData.oPlugin, "$")) {
-				arguments.interceptData.oPlugin.$ = {};	
+			// check for renderer
+			if( isInstanceOf(arguments.interceptData.oPlugin,"coldbox.system.plugins.Renderer") ){
+				var slatwall = controller.getWireBox().getInstance("slatwall");
+				
+				if(!structKeyExists(arguments.interceptData.oPlugin, "$")) {
+					arguments.interceptData.oPlugin.$ = {};	
+				}
+				
+				// decorate it
+				arguments.interceptData.oPlugin.$.slatwall = slatwall.getSlatwallScope();
+				arguments.interceptData.oPlugin.$slatwallInject = variables.$slatwallInject;
+				arguments.interceptData.oPlugin.$slatwallInject();
+				
 			}
-			
-			// decorate it
-			arguments.interceptData.oPlugin.$.slatwall = slatwall.getSlatwallScope();
-			arguments.interceptData.oPlugin.$slatwallInject = variables.$cbInject;
-			arguments.interceptData.oPlugin.$slatwallInject();
-			
-			// announce event
-			announceInterception("cbui_onRendererDecoration",{renderer=arguments.interceptData.oPlugin,CBHelper=arguments.interceptData.oPlugin.cb});
 		}
-	
+		
 	}
 	
 	/**
@@ -139,5 +157,32 @@ Optional Methods
 	function $slatwallInject(){
 		variables.$ = this.$;
 	}
+	
 
+	private struct function getAppMeta() {
+		if( listFirst(server.coldfusion.productVersion,",") gte 10 ){
+			return getApplicationMetadata();
+		} else{
+			return application.getApplicationSettings();
+		}
+	}
+	
+	private boolean function getSlatwallInstalledFlag() {
+		if(this.slatwallInstalled) {
+			return true;
+		}
+		this.slatwallInstalled = directoryExists(getDirectoryFromPath(getCurrentTemplatePath()) & "Slatwall");
+		return this.slatwallInstalled;
+	}
+	
+	private boolean function getSlatwallConfiguredFlag() {
+		if(this.slatwallConfigured) {
+			return true;
+		}
+		var appMeta = getAppMeta();
+		
+		this.slatwallConfigured = structKeyExists(appMeta.Mappings, "/Slatwall") && structKeyExists(appMeta.Mappings, "/Hibachi") && structKeyExists(appMeta, "ormEnabled") && appMeta.ormEnabled && structKeyExists(appMeta, "datasource");
+		
+		return this.slatwallConfigured;
+	}
 }
