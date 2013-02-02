@@ -5,11 +5,12 @@
 		<cfargument name="applicationName" type="string" required="true">
 		<cfargument name="applicationDatasource" type="string" required="true">
 		
+		
+		<!--- Define what the Slatwall directory will be ---> 
+		<cfset var slatwallDirectoryPath = "#getDirectoryFromPath(expandPath('/'))#Slatwall" />
+		
 		<!--- Verify that Slatwall isn't installed --->
-		<cfif not directoryExists("#moduleDirectoryPath#Slatwall")>
-			
-			<!--- Define what the Slatwall directory will be ---> 
-			<cfset slatwallDirectoryPath = "#moduleDirectoryPath#Slatwall" /> 
+		<cfif not directoryExists(slatwallDirectoryPath)>
 			
 			<!--- start download --->
 			<cfhttp url="https://github.com/ten24/Slatwall/archive/feature-standalone.zip" method="get" path="#getTempDirectory()#" file="slatwall.zip" />
@@ -23,7 +24,7 @@
 			<cfdirectory action="rename" directory="#getTempDirectory()##listFirst(listFirst(slatwallZipDirectoryList.DIRECTORY, "\"), "/")#/" newdirectory="#slatwallDirectoryPath#" />
 			
 			<!--- Set Application Datasource in custom Slatwall config --->
-			<cffile action="write" file="#slatwallDirectoryPath#/config/custom/configApplication.cfm" output='<cfset this.datasource.name = "#arguments.applicationDatasource#" />#chr(13)#<cfset this.name = "#arguments.applicationName#" />'>
+			<cffile action="write" file="#slatwallDirectoryPath#/custom/config/configApplication.cfm" output='<cfset this.datasource.name = "#arguments.applicationDatasource#" />#chr(13)#<cfset this.name = "#arguments.applicationName#" />'>
 			
 		</cfif>
 	</cffunction>
