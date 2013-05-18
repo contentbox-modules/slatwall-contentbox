@@ -23,7 +23,14 @@
 			<cfzip action="unzip" destination="#arguments.appPath#" file="#getTempDirectory()#slatwall.zip" >
 			<cfdirectory action="rename" directory="#arguments.appPath#/Slatwall-rc3" newdirectory="#arguments.appPath#/Slatwall" />
 			<!--- Set Application Datasource in custom Slatwall config --->
-			<cffile action="write" file="#slatwallDirectoryPath#/custom/config/configApplication.cfm" output='<cfset this.name = "#arguments.applicationName#" />#chr(13)#<cfset this.datasource.name = "#arguments.applicationDatasource#" />'>
+			<cffile action="write" file="#slatwallDirectoryPath#/custom/config/configApplication.cfm" output='
+				<cfset this.name = "#arguments.applicationName#" />#chr(13)#
+				<cfset this.datasource.name = "#arguments.applicationDatasource#" />#chr(13)#
+				<cfset this.mappings["/contentbox"] = "../modules/contentbox" />#chr(13)#
+				<cfset this.mappings["/contentbox-ui"] = "../modules/contentbox-ui" />#chr(13)#
+				<cfset this.mappings["/contentbox-admin"] = "../modules/contentbox-admin" />#chr(13)#
+				<cfset this.mappings["/coldbox"] 	 = "../coldbox" />'
+				>
 			<cffile action="write" file="#slatwallDirectoryPath#/custom/config/configORM.cfm" output='<cfset this.ormsettings.cfclocation=["../model","../modules","/Slatwall/model/entity"] />#chr(13)#<cfset this.ormsettings.eventHandler = "modules.contentbox.model.system.EventHandler" />#chr(13)#<cfset this.ormsettings.datasource = "#arguments.applicationDatasource#" />'>
 			<cfset processAppCFCUpdate(appPath) />
 			<!--- If we have a layoutPath, then copy the templates into them --->
