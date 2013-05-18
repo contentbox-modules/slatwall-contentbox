@@ -56,7 +56,7 @@
 			fileWrite(appCFCPath, c);
 		}
 		function copyTemplates(slatwallDirectoryPath,layoutPath) {
-			var folderPath = '#arguments.layoutPath#/layouts';
+			var folderPath = '#arguments.layoutPath#layouts';
 			var templateFiles = directorylist('#arguments.slatwallDirectoryPath#/public/views/templates');
 			for(var templateFile in templateFiles) {
 				fileCopy(templateFile,'#folderPath#');
