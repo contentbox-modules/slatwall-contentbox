@@ -69,28 +69,33 @@ Optional Methods
 	* Fired when the module is registered and activated.
 	*/
 	function onLoad(){
-		//writeDump(variables);abort;
-		//writeDump(getSlatwallConfiguredFlag());writeDump(getSlatwallInstalledFlag());abort;
 		if(not getSlatwallInstalledFlag()) {
+
 			appMeta = getAppMeta();
 			if(isStruct(appMeta.datasource) && structKeyExists(appMeta.datasource, "name")) {
 				var ds = appMeta.datasource.name;
 			} else {
 				var ds = appMeta.datasource;
 			}
-
+			//get the ContentBox Layout service
+			var layoutService = controller.getWireBox().getInstance('layoutService@cb');
+			var layoutPath = '';
+			//if we are in ContentBox, this won't be null, so now we know
+			if (!isNull(layoutService)) {
+				var layout = LayoutService.getActiveLayout();
+				layoutPath = "#layout.directory#/#layout.name#/";
+			}
 			var slatwallSetup = new model.SlatwallSetup();
-			slatwallSetup.setupSlatwall(appPath=expandPath('/'), applicationName=appMeta.name, applicationDatasource=ds);
+			slatwallSetup.setupSlatwall(appPath=expandPath('/'), applicationName=appMeta.name, applicationDatasource=ds, layoutPath=layoutPath);
 
 		}
 		if(getSlatwallInstalledFlag()) {
 			binder.map("slatwall").toValue(new Slatwall.Application()).asSingleton();
 		}
+
 	}
 
 	function preProcess( required any event, required struct interceptData  ) {
-
-		//writeDump(getSlatwallConfiguredFlag());writeDump(getSlatwallInstalledFlag());abort;
 		if(getSlatwallConfiguredFlag() && getSlatwallInstalledFlag()) {
 
 			var slatwall = controller.getWireBox().getInstance("slatwall");
