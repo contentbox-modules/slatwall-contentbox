@@ -54,86 +54,94 @@ Optional Methods
 	this.layoutParentLookup = true;
 	// Module Entry Point
 	this.entryPoint			= "slatwall-coldbox";
-	
+
 	this.slatwallInstalled	= false;
 	this.slatwallConfigured	= false;
 	this.slatwall = "";
 
 	function configure(){
 
-		
+
 	}
-	
+
 
 	/**
 	* Fired when the module is registered and activated.
 	*/
 	function onLoad(){
-		if(getSlatwallConfiguredFlag() && not getSlatwallInstalledFlag()) {
+		//writeDump(variables);abort;
+		//writeDump(getSlatwallConfiguredFlag());writeDump(getSlatwallInstalledFlag());abort;
+		if(not getSlatwallInstalledFlag()) {
 			appMeta = getAppMeta();
-			
 			if(isStruct(appMeta.datasource) && structKeyExists(appMeta.datasource, "name")) {
-				var ds = appMeta.datasource.name;	
+				var ds = appMeta.datasource.name;
 			} else {
 				var ds = appMeta.datasource;
 			}
-			
-			var slatwallSetup = new model.SlatwallSetup();	
-			slatwallSetup.setupSlatwall(moduleDirectoryPath=getDirectoryFromPath(getCurrentTemplatePath()), applicationName=appMeta.name, applicationDatasource=ds);
-			
+
+			var slatwallSetup = new model.SlatwallSetup();
+			slatwallSetup.setupSlatwall(appPath=expandPath('/'), applicationName=appMeta.name, applicationDatasource=ds);
+
 		}
 		if(getSlatwallInstalledFlag()) {
-			binder.map("slatwall").toValue(new Slatwall.Application());
+			binder.map("slatwall").toValue(new Slatwall.Application()).asSingleton();
 		}
 	}
 
 	function preProcess( required any event, required struct interceptData  ) {
+
+		//writeDump(getSlatwallConfiguredFlag());writeDump(getSlatwallInstalledFlag());abort;
 		if(getSlatwallConfiguredFlag() && getSlatwallInstalledFlag()) {
+
 			var slatwall = controller.getWireBox().getInstance("slatwall");
-			
+
 			slatwall.setupGlobalRequest();
 			var prc = event.getCollection(private=true);
-			
+			var rc = event.getCollection();
+
 			if(!structKeyExists(prc, "$")) {
 				prc.$ = {};
 			}
-			prc.$.slatwall = slatwall.getSlatwallScope();	
+			prc.$.slatwall = request.slatwallScope;
+			if(event.valueExists( name="slatAction")) {
+				prc.$.slatwall.doAction(rc.slatAction,rc);
+			}
 		}
 	}
-	
+
 	/*
 	* Renderer helper injection
 	*/
 	function afterPluginCreation(event,interceptData){
-		
+
 		if(getSlatwallConfiguredFlag() && getSlatwallInstalledFlag()) {
 			var prc = event.getCollection(private=true);
-			
+
 			// check for renderer
 			if( isInstanceOf(arguments.interceptData.oPlugin,"coldbox.system.plugins.Renderer") ){
 				var slatwall = controller.getWireBox().getInstance("slatwall");
-				
+
 				if(!structKeyExists(arguments.interceptData.oPlugin, "$")) {
-					arguments.interceptData.oPlugin.$ = {};	
+					arguments.interceptData.oPlugin.$ = {};
 				}
-				
+
 				// decorate it
-				arguments.interceptData.oPlugin.$.slatwall = slatwall.getSlatwallScope();
+				arguments.interceptData.oPlugin.$.slatwall = request.slatwallScope;
 				arguments.interceptData.oPlugin.$slatwallInject = variables.$slatwallInject;
 				arguments.interceptData.oPlugin.$slatwallInject();
-				
+
 			}
 		}
-		
+
 	}
-	
+
 	/**
 	* private inject
 	*/
 	function $slatwallInject(){
 		variables.$ = this.$;
 	}
-	
+
 
 	private struct function getAppMeta() {
 		if( listFirst(server.coldfusion.productVersion,",") gte 10 ){
@@ -142,23 +150,26 @@ Optional Methods
 			return application.getApplicationSettings();
 		}
 	}
-	
+
 	private boolean function getSlatwallInstalledFlag() {
 		if(this.slatwallInstalled) {
 			return true;
 		}
-		this.slatwallInstalled = directoryExists("#getDirectoryFromPath(expandPath('/'))#Slatwall");
+		//this.slatwallInstalled = directoryExists("#modulePath#/Slatwall");
+
+		this.slatwallInstalled = directoryExists(expandPath('/Slatwall'));
+
 		return this.slatwallInstalled;
 	}
-	
+
 	private boolean function getSlatwallConfiguredFlag() {
 		if(this.slatwallConfigured) {
 			return true;
 		}
 		var appMeta = getAppMeta();
-		
+
 		this.slatwallConfigured = structKeyExists(appMeta.Mappings, "/Slatwall") && structKeyExists(appMeta, "ormEnabled") && appMeta.ormEnabled && structKeyExists(appMeta, "datasource");
-		
+
 		return this.slatwallConfigured;
 	}
 }
