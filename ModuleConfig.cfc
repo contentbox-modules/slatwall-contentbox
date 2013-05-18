@@ -92,7 +92,13 @@ Optional Methods
 		if(getSlatwallInstalledFlag()) {
 			binder.map("slatwall").toValue(new Slatwall.Application()).asSingleton();
 		}
-
+		// ContentBox loading
+		if( structKeyExists( controller.getSetting("modules"), "contentbox" ) ){
+			// Let's add ourselves to the main menu in the Modules section
+			var menuService = controller.getWireBox().getInstance("AdminMenuService@cb");
+			// Add Menu Contribution
+			menuService.addSubMenu(topMenu=menuService.MODULES,name="Slatwall",label="Slatwall Admin",href="#appMapping#/Slatwall");
+		}
 	}
 
 	function preProcess( required any event, required struct interceptData  ) {
