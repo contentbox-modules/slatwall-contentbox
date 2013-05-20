@@ -106,16 +106,22 @@ Optional Methods
 
 			var slatwall = controller.getWireBox().getInstance("slatwall");
 
-			slatwall.setupGlobalRequest();
 			var prc = event.getCollection(private=true);
 			var rc = event.getCollection();
 
 			if(!structKeyExists(prc, "$")) {
 				prc.$ = {};
 			}
-			prc.$.slatwall = request.slatwallScope;
+			
+			prc.$.slatwall = slatwall.bootstrap();
+			
 			if(event.valueExists( name="slatAction")) {
-				prc.$.slatwall.doAction(rc.slatAction,rc);
+				
+				var actionArray = listToArray( rc.slatAction );
+				
+				for(var a=1; a<=arrayLen(a); a++) {
+					prc.$.slatwall.doAction( rc.slatAction, rc );	
+				}
 			}
 		}
 	}
