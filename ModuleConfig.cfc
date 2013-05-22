@@ -92,6 +92,12 @@ Optional Methods
 		if(getSlatwallInstalledFlag()) {
 			binder.map("slatwall").toValue(new Slatwall.Application()).asSingleton();
 		}
+		if(not getSlatwallContentConfigured()) {
+			var slatwall = controller.getWireBox().getInstance("slatwall");
+			slatwall.bootstrap();
+			var slatwallSyncService = controller.getWireBox().getInstance("modules.contentbox.modules.slatwall-coldbox.model.SlatwallSyncService");
+			slatwallSyncService.setupContent();
+		}
 		// ContentBox loading
 		if( structKeyExists( controller.getSetting("modules"), "contentbox" ) ){
 			// Let's add ourselves to the main menu in the Modules section
@@ -112,15 +118,15 @@ Optional Methods
 			if(!structKeyExists(prc, "$")) {
 				prc.$ = {};
 			}
-			
+
 			prc.$.slatwall = slatwall.bootstrap();
-			
+
 			if(event.valueExists( name="slatAction")) {
-				
+
 				var actionArray = listToArray( rc.slatAction );
-				
+
 				for(var a=1; a<=arrayLen(a); a++) {
-					prc.$.slatwall.doAction( rc.slatAction, rc );	
+					prc.$.slatwall.doAction( rc.slatAction, rc );
 				}
 			}
 		}
@@ -151,6 +157,17 @@ Optional Methods
 		}
 
 	}
+
+	/**
+	* Listen to when pages are saved, then call our service to sync the content
+	*/
+	function cbadmin_postPageSave(event,interceptData) {
+		var page = arguments.interceptData.page;
+		var slatwallSyncService = controller.getWireBox().getInstance("modules.contentbox.modules.slatwall-coldbox.model.SlatwallSyncService");
+		slatwallSyncService.syncContent(page);
+	}
+
+
 
 	/**
 	* private inject
@@ -189,4 +206,13 @@ Optional Methods
 
 		return this.slatwallConfigured;
 	}
+
+	private boolean function getSlatwallContentConfigured() {
+		var slatwall = controller.getWireBox().getInstance("slatwall");
+		slatwall.bootstrap();
+		var content = entityLoad('SlatwallContent',{},{maxResults=1});
+		return arrayLen(content);
+	}
+
+
 }
