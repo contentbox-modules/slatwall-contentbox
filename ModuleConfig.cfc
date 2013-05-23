@@ -93,8 +93,6 @@ Optional Methods
 			binder.map("slatwall").toValue(new Slatwall.Application()).asSingleton();
 		}
 		if(not getSlatwallContentConfigured()) {
-			var slatwall = controller.getWireBox().getInstance("slatwall");
-			slatwall.bootstrap();
 			var slatwallSyncService = controller.getWireBox().getInstance("modules.contentbox.modules.slatwall-coldbox.model.SlatwallSyncService");
 			slatwallSyncService.setupContent();
 		}

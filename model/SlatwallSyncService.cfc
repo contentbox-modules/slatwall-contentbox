@@ -10,12 +10,11 @@ component output="false" displayname=""  {
 
 	public function setupContent() {
 		//get all the currently published pages from contentbox
-		var content = pageService.findPublishedPages();
+		var content = getPublishedPages();
 		//populate and save Slatwall content with contentbox content
-		for (var c in content.pages) {
+		for (var c in content) {
 			var sc = slatwallContentService.new();
 			populateAndSaveContent(sc,c);
-			//TODO: parent/child content relationship
 		}
 	}
 
@@ -33,6 +32,10 @@ component output="false" displayname=""  {
 		arguments.slatwallContent.setCMSContentID(arguments.page.getContentID());
 		arguments.slatwallContent.setTitle(arguments.page.getTitle());
 		arguments.slatwallContent.setSite(site);
+		if(arguments.page.hasParent()){
+			var slatwallParent = slatwallContentService.findWhere({cmsContentID=arguments.page.getParent().getContentID()});
+			arguments.slatwallContent.setParentContent(slatwallParent);
+		}
 		slatwallContentService.save(arguments.slatwallContent);
 	}
 
@@ -49,6 +52,22 @@ component output="false" displayname=""  {
 			return setupSite();
 		}
 		return sites[1];
+	}
+
+	private function getPublishedPages() {
+		var c = pageService.newCriteria();
+		// sorting
+		var sortOrder = "parent,order";
+
+		// only published pages
+		c.isTrue("isPublished")
+			.isLT("publishedDate", Now())
+			.$or( c.restrictions.isNull("expireDate"), c.restrictions.isGT("expireDate", now() ) )
+			// only non-password pages
+			.isEq("passwordProtection","");
+		var pages 	= c.resultTransformer( c.DISTINCT_ROOT_ENTITY )
+							.list(sortOrder=sortOrder,asQuery=false);
+		return pages;
 	}
 
 
