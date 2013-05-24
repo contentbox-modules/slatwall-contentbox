@@ -1,7 +1,5 @@
 <cfcomponent output="false">
 
-	<cfproperty name="appPath" inject="coldbox:setting:applicationPath" />
-
 	<cffunction name="setupSlatwall">
 		<cfargument name="appPath" type="string" required="true">
 		<cfargument name="applicationName" type="string" required="true">
@@ -32,7 +30,7 @@
 				<cfset this.mappings["/coldbox"] 	 = "../coldbox" />'
 				>
 			<cffile action="write" file="#slatwallDirectoryPath#/custom/config/configORM.cfm" output='<cfset this.ormsettings.cfclocation=["../model","../modules","/Slatwall/model/entity"] />#chr(13)#<cfset this.ormsettings.eventHandler = "modules.contentbox.model.system.EventHandler" />#chr(13)#<cfset this.ormsettings.datasource = "#arguments.applicationDatasource#" />'>
-			<cfset processAppCFCUpdate(appPath) />
+			<cfset processAppCFCUpdate(arguments.appPath) />
 			<!--- If we have a layoutPath, then copy the templates into them --->
 			<cfif len(arguments.layoutPath)>
 				<cfset copyTemplates(slatwallDirectoryPath,arguments.layoutPath) />
@@ -55,6 +53,7 @@
 			c = insert('#chr(13)#//Slatwall Setup#chr(13)#this.mappings["/Slatwall"] = COLDBOX_APP_ROOT_PATH & "Slatwall";#chr(13)#arrayAppend(this.ormSettings.cfclocation,"/Slatwall/model/entity");#chr(13)#', c, start);
 			fileWrite(appCFCPath, c);
 		}
+
 		function copyTemplates(slatwallDirectoryPath,layoutPath) {
 			var folderPath = '#arguments.layoutPath#layouts';
 			var templateFiles = directorylist('#arguments.slatwallDirectoryPath#/public/views/templates');
@@ -62,6 +61,7 @@
 				fileCopy(templateFile,'#folderPath#');
 			}
 		}
+
 	</cfscript>
 
 </cfcomponent>
