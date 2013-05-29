@@ -166,6 +166,33 @@ Optional Methods
 	}
 
 
+	function cbui_onPageNotFound(event,interceptData) {
+		var rc = event.getCollection();
+		var prc = event.getCollection(private=true);
+		var $ = prc.$;
+		// Inspect the rc looking for slatwall URL key, and then setup the proper objects in the slatwallScope
+		if (event.valueExists( $.slatwall.setting('globalURLKeyBrand') )) {
+			title = event.getValue( $.slatwall.setting('globalURLKeyBrand') );
+			$.slatwall.setBrand( $.slatwall.getService("brandService").getBrandByURLTitle( title ) );
+		}
+		if (event.valueExists( $.slatwall.setting('globalURLKeyProduct') )) {
+			title = event.getValue( $.slatwall.setting('globalURLKeyProduct') );
+			$.slatwall.setProduct( $.slatwall.getService("productService").getProductByURLTitle( title ) );
+		}
+		if (event.valueExists( $.slatwall.setting('globalURLKeyProductType') )) {
+			title = event.getValue( $.slatwall.setting('globalURLKeyProductType') );
+			$.slatwall.setProductType( $.slatwall.getService("productService").getProductTypeByURLTitle( title ) );
+		}
+		prc.pageOverride = "product-listing/product";
+		controller.runEvent(event=rc.event);
+		var mobileDetector = controller.getWireBox().getInstance("mobileDetector@cb");
+		var isMobileDevice = mobileDetector.isMobile();
+		var thisLayout = ( isMobileDevice ? prc.page.getMobileLayoutWithInheritance() : prc.page.getLayoutWithInheritance() );
+		// set skin view
+		event.setLayout(name="#prc.cbLayout#/layouts/#thisLayout#", module="contentbox")
+			.setView(view="#prc.cbLayout#/views/page", module="contentbox");
+	}
+
 
 	/**
 	* private inject
