@@ -123,8 +123,8 @@ Optional Methods
 
 				var actionArray = listToArray( rc.slatAction );
 
-				for(var a=1; a<=arrayLen(a); a++) {
-					prc.$.slatwall.doAction( rc.slatAction, rc );
+				for(var a=1; a<=arrayLen(actionArray); a++) {
+					prc.$.slatwall.doAction( actionArray[a], rc );
 				}
 			}
 		}
