@@ -61,6 +61,10 @@ Optional Methods
 
 	function configure(){
 
+		// Interceptors
+		// interceptors = [
+		// 	{ class="#moduleMapping#.interceptors.slatwall", name="slatwall" }
+		// ];
 
 	}
 
@@ -87,10 +91,18 @@ Optional Methods
 			}
 			var slatwallSetup = new model.SlatwallSetup();
 			slatwallSetup.setupSlatwall(appPath=expandPath('/'), applicationName=appMeta.name, applicationDatasource=ds, layoutPath=layoutPath);
+			//TODO: create content!!
+			//products
 
 		}
 		if(getSlatwallInstalledFlag()) {
 			binder.map("slatwall").toValue(new Slatwall.Application()).asSingleton();
+			//setup the wirebox mapping and bootstrap
+			var slatwall = controller.getWireBox().getInstance("slatwall");
+			slatwall.bootstrap();
+			// register the interceptor to listen to all events declared
+			controller.getInterceptorService()
+				.registerInterceptor(interceptorClass="#moduleMapping#.interceptors.slatwall");
 		}
 		if(not getSlatwallContentConfigured()) {
 			var slatwallSyncService = controller.getWireBox().getInstance("modules.contentbox.modules.slatwall-coldbox.model.SlatwallSyncService");
@@ -118,6 +130,8 @@ Optional Methods
 			}
 
 			prc.$.slatwall = slatwall.bootstrap();
+			prc.$.slatwall.setSite( prc.$.slatwall.getService('siteService').getSiteByCMSSiteID( '1' ) ); //set dynamicly when we are multitenant
+			//prc.$.slatwall.setContent(); //TODO, set the content
 
 			if(event.valueExists( name="slatAction")) {
 
@@ -155,44 +169,6 @@ Optional Methods
 		}
 
 	}
-
-	/**
-	* Listen to when pages are saved, then call our service to sync the content
-	*/
-	function cbadmin_postPageSave(event,interceptData) {
-		var page = arguments.interceptData.page;
-		var slatwallSyncService = controller.getWireBox().getInstance("modules.contentbox.modules.slatwall-coldbox.model.SlatwallSyncService");
-		slatwallSyncService.syncContent(page);
-	}
-
-
-	function cbui_onPageNotFound(event,interceptData) {
-		var rc = event.getCollection();
-		var prc = event.getCollection(private=true);
-		var $ = prc.$;
-		// Inspect the rc looking for slatwall URL key, and then setup the proper objects in the slatwallScope
-		if (event.valueExists( $.slatwall.setting('globalURLKeyBrand') )) {
-			title = event.getValue( $.slatwall.setting('globalURLKeyBrand') );
-			$.slatwall.setBrand( $.slatwall.getService("brandService").getBrandByURLTitle( title ) );
-		}
-		if (event.valueExists( $.slatwall.setting('globalURLKeyProduct') )) {
-			title = event.getValue( $.slatwall.setting('globalURLKeyProduct') );
-			$.slatwall.setProduct( $.slatwall.getService("productService").getProductByURLTitle( title ) );
-		}
-		if (event.valueExists( $.slatwall.setting('globalURLKeyProductType') )) {
-			title = event.getValue( $.slatwall.setting('globalURLKeyProductType') );
-			$.slatwall.setProductType( $.slatwall.getService("productService").getProductTypeByURLTitle( title ) );
-		}
-		prc.pageOverride = "product-listing/product";
-		controller.runEvent(event=rc.event);
-		var mobileDetector = controller.getWireBox().getInstance("mobileDetector@cb");
-		var isMobileDevice = mobileDetector.isMobile();
-		var thisLayout = ( isMobileDevice ? prc.page.getMobileLayoutWithInheritance() : prc.page.getLayoutWithInheritance() );
-		// set skin view
-		event.setLayout(name="#prc.cbLayout#/layouts/#thisLayout#", module="contentbox")
-			.setView(view="#prc.cbLayout#/views/page", module="contentbox");
-	}
-
 
 	/**
 	* private inject

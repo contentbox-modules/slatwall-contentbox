@@ -42,6 +42,7 @@ component output="false" displayname=""  {
 	private function setupSite() {
 		var site = slatwallSiteService.new();
 		site.setSiteName('ContentBox Site');//for now, need to make this more dynamic when we have multi-site capiblities.
+		site.setCMSSiteID('1');
 		slatwallSiteService.save(site);
 		return site;
 	}
