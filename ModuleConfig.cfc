@@ -60,12 +60,6 @@ Optional Methods
 	this.slatwall = "";
 
 	function configure(){
-
-		// Interceptors
-		// interceptors = [
-		// 	{ class="#moduleMapping#.interceptors.slatwall", name="slatwall" }
-		// ];
-
 	}
 
 

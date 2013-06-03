@@ -18,10 +18,15 @@ component output="false" displayname=""  {
 		}
 	}
 
-	public function syncContent(page) {
+	public function syncContent(required page, required data) {
 		var sc = slatwallContentService.findWhere({cmsContentID=page.getContentID()});
 		if(isNull(sc)){
 			var sc = slatwallContentService.new();
+		}
+		if(structKeyExists(data, "productListingPageFlag")) {
+			sc.setProductListingPageFlag(true);
+		} else {
+			sc.setProductListingPageFlag(false);
 		}
 		populateAndSaveContent(sc,arguments.page);
 	}

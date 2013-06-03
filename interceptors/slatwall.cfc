@@ -4,14 +4,16 @@ component output="false" {
 	property name="slatwall" inject="id:slatwall";
 	property name="slatwallSyncService" inject="id:modules.contentbox.modules.slatwall-coldbox.model.SlatwallSyncService";
 	property name="pageService" inject="id:pageService@cb";
+	property name="html" inject="coldbox:plugin:htmlHelper";
+
 	/**
 	* Listen to when pages are saved, then call our service to sync the content
 	*/
 	function cbadmin_postPageSave(event,interceptData) {
+		var rc = event.getCollection();
 		var page = arguments.interceptData.page;
-		slatwallSyncService.syncContent(page);
+		slatwallSyncService.syncContent(page,rc);
 	}
-
 
 	function cbui_onPageNotFound(event,interceptData) {
 		var rc = event.getCollection();
@@ -47,9 +49,13 @@ component output="false" {
 
 			if( productKeyLocation && productKeyLocation > productTypeKeyLocation && productKeyLocation > brandKeyLocation && !$.slatwall.getCurrentProduct().isNew() && $.slatwall.getCurrentProduct().getActiveFlag() && ($.slatwall.getCurrentProduct().getPublishedFlag() || $.slatwall.getCurrentProduct().setting('productShowDetailWhenNotPublishedFlag'))) {
 				$.slatwall.setContent($.slatwall.getService("contentService").getContent($.slatwall.getCurrentProduct().setting('productDisplayTemplate', [$.slatwall.getSite()])));
-				var newPage = pageService.get( $.slatwall.getCurrentContent().getCMSContentID() );
-				prc.pageOverride = newPage.getSlug();
+			} else if ( productTypeKeyLocation && productTypeKeyLocation > brandKeyLocation && !$.slatwall.getCurrentProductType().isNew() && $.slatwall.getCurrentProductType().getActiveFlag() ) {
+				$.slatwall.setContent($.slatwall.getService("contentService").getContent($.slatwall.getCurrentProductType().setting('productTypeDisplayTemplate', [$.slatwall.getSite()])));
+			} else if ( brandKeyLocation && !$.slatwall.getCurrentBrand().isNew() && $.slatwall.getCurrentBrand().getActiveFlag()  ) {
+				$.slatwall.setContent($.slatwall.getService("contentService").getContent($.slatwall.getCurrentBrand().setting('brandDisplayTemplate', [$.slatwall.getSite()])));
 			}
+			var slatwallPage = pageService.get( $.slatwall.getCurrentContent().getCMSContentID() );
+			prc.pageOverride = slatwallPage.getSlug();
 
 			controller.runEvent(event=rc.event);
 			var mobileDetector = controller.getWireBox().getInstance("mobileDetector@cb");
@@ -60,6 +66,30 @@ component output="false" {
 			.setView(view="#prc.cbLayout#/views/page", module="contentbox");
 		}
 	}
+
+
+	function cbadmin_pageEditorSidebarAccordion(event,interceptData) {
+		var rc = event.getCollection();
+		var prc = event.getCollection(private=true);
+		var slatwallContent = prc.$.slatwall.getService("contentService").getContentByCMSContentIDAndCMSSiteID(prc.page.getContentID(),'1'); //get set dynamically when the time comes
+		var accordion = '
+            <div class="accordion-group">
+            	<div class="accordion-heading">
+              		<a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="##accordion" href="##slatwallattributes">
+                		<i class="icon-tasks icon-large"></i> Slatwall Attributes
+              		</a>
+            	</div>
+            	<div id="slatwallattributes" class="accordion-body collapse">
+              		<div class="accordion-inner">
+                		#html.checkBox(name="productListingPageFlag",label="Product Listing Page",title="Is this a Slatwall Product Listing Page?",bind=slatWallContent,class="input-block-level")#
+              		</div>
+            	</div>
+          	</div>
+		';
+		appendToBuffer( accordion );
+	}
+
+
 
 
 }
