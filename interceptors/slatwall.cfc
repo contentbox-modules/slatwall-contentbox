@@ -72,6 +72,21 @@ component output="false" {
 		var rc = event.getCollection();
 		var prc = event.getCollection(private=true);
 		var slatwallContent = prc.$.slatwall.getService("contentService").getContentByCMSContentIDAndCMSSiteID(prc.page.getContentID(),'1'); //get set dynamically when the time comes
+		var slatwallContentTemplaes = prc.$.slatwall.getContent().getContentTemplateTypeOptions();
+		var selectedContentType = "";
+
+		//set the selectedValue if we have a template
+		if(slatWallContent.hasContentTemplateType()){
+			selectedContentType = slatWallContent.getContentTemplateType().getTypeID();
+		}
+
+		//fix for weird cf issue with the array from slatwall
+		var options = [];
+		for(var item in slatwallContentTemplaes){
+			var s = {name=item["name"],value=item["value"]};
+			arrayAppend(options,s);
+		}
+
 		var accordion = '
             <div class="accordion-group">
             	<div class="accordion-heading">
@@ -82,6 +97,7 @@ component output="false" {
             	<div id="slatwallattributes" class="accordion-body collapse">
               		<div class="accordion-inner">
                 		#html.checkBox(name="productListingPageFlag",label="Product Listing Page",title="Is this a Slatwall Product Listing Page?",bind=slatWallContent,class="input-block-level")#
+                		#html.select(name="contentTemplateType",label="Page Type",options=options,column="value",nameColumn="name",selectedValue=selectedContentType)#
               		</div>
             	</div>
           	</div>

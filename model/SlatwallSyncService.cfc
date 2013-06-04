@@ -3,6 +3,7 @@ component output="false" displayname=""  {
 	property name="pageService" inject="id:pageService@cb";
 	property name="slatwallContentService" inject="entityService:SlatwallContent";
 	property name="slatwallSiteService" inject="entityService:SlatwallSite";
+	property name="slatwallTypeService" inject="entityService:SlatwallType";
 
 	public function init(){
 		return this;
@@ -27,6 +28,13 @@ component output="false" displayname=""  {
 			sc.setProductListingPageFlag(true);
 		} else {
 			sc.setProductListingPageFlag(false);
+		}
+		if(structKeyExists(data,"contentTemplateType") && len(data.contentTemplateType)) {
+			var type = slatwallTypeService.get(data.contentTemplateType);
+			sc.setContentTemplateType(type);
+		} else {
+			//remove the template type
+			sc.setContentTemplateType(javaCast('null',''));
 		}
 		populateAndSaveContent(sc,arguments.page);
 	}
