@@ -86,9 +86,15 @@ Optional Methods
 			var slatwallSetup = new model.SlatwallSetup();
 			slatwallSetup.setupSlatwall(appPath=expandPath('/'), applicationName=appMeta.name, applicationDatasource=ds, layoutPath=layoutPath);
 			//TODO: create content!!
-			//products
+			//product listing
+			//product
+			//cart
+			//account
+			//checkout
 
 		}
+
+		//If slatwall is installed, do some extra stuff
 		if(getSlatwallInstalledFlag()) {
 			binder.map("slatwall").toValue(new Slatwall.Application()).asSingleton();
 			//setup the wirebox mapping and bootstrap
@@ -98,11 +104,14 @@ Optional Methods
 			controller.getInterceptorService()
 				.registerInterceptor(interceptorClass="#moduleMapping#.interceptors.slatwall");
 		}
+
+		//If we haven't synced up the content yet, do it!
 		if(not getSlatwallContentConfigured()) {
 			var slatwallSyncService = controller.getWireBox().getInstance("modules.contentbox.modules.slatwall-coldbox.model.SlatwallSyncService");
 			slatwallSyncService.setupContent();
 		}
-		// ContentBox loading
+
+		// ContentBox loaded?
 		if( structKeyExists( controller.getSetting("modules"), "contentbox" ) ){
 			// Let's add ourselves to the main menu in the Modules section
 			var menuService = controller.getWireBox().getInstance("AdminMenuService@cb");
@@ -125,7 +134,9 @@ Optional Methods
 
 			prc.$.slatwall = slatwall.bootstrap();
 			prc.$.slatwall.setSite( prc.$.slatwall.getService('siteService').getSiteByCMSSiteID( '1' ) ); //set dynamicly when we are multitenant
-			//prc.$.slatwall.setContent(); //TODO, set the content
+			if(structKeyExists(prc,"page")){
+				prc.$.slatwall.setContent( $.slatwall.getService("contentService").getContentByCMSContentID(prc.page.getContentID()) );
+			}
 
 			if(event.valueExists( name="slatAction")) {
 
@@ -184,7 +195,6 @@ Optional Methods
 		if(this.slatwallInstalled) {
 			return true;
 		}
-		//this.slatwallInstalled = directoryExists("#modulePath#/Slatwall");
 
 		this.slatwallInstalled = directoryExists(expandPath('/Slatwall'));
 
