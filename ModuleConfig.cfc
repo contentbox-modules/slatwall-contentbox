@@ -69,7 +69,7 @@ Optional Methods
 	function onLoad(){
 		if(not getSlatwallInstalledFlag()) {
 
-			appMeta = getAppMeta();
+			var appMeta = getAppMeta();
 			if(isStruct(appMeta.datasource) && structKeyExists(appMeta.datasource, "name")) {
 				var ds = appMeta.datasource.name;
 			} else {
@@ -85,12 +85,6 @@ Optional Methods
 			}
 			var slatwallSetup = new model.SlatwallSetup();
 			slatwallSetup.setupSlatwall(appPath=expandPath('/'), applicationName=appMeta.name, applicationDatasource=ds, layoutPath=layoutPath);
-			//TODO: create content!!
-			//product listing
-			//product
-			//cart
-			//account
-			//checkout
 
 		}
 

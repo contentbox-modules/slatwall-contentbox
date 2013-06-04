@@ -15,6 +15,15 @@ component output="false" {
 		slatwallSyncService.syncContent(page,rc);
 	}
 
+	/**
+	* Listen to when pages are deleted
+	*/
+	function cbadmin_prePageRemove(event,interceptData) {
+		var rc = event.getCollection();
+		var page = arguments.interceptData.page;
+		slatwallSyncService.removeContent(page,rc);
+	}
+
 	function cbui_onPageNotFound(event,interceptData) {
 		var rc = event.getCollection();
 		var prc = event.getCollection(private=true);
