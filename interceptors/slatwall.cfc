@@ -5,29 +5,34 @@ component output="false" {
 	property name="slatwallSyncService" inject="id:modules.contentbox.modules.slatwall-coldbox.model.SlatwallSyncService";
 	property name="pageService" inject="id:pageService@cb";
 	property name="html" inject="coldbox:plugin:htmlHelper";
+	property name="moduleService"	inject="id:moduleService@cb";
 
 	/**
 	* Listen to when pages are saved, then call our service to sync the content
 	*/
 	function cbadmin_postPageSave(event,interceptData) {
-		var rc = event.getCollection();
-		var page = arguments.interceptData.page;
-		slatwallSyncService.syncContent(page,rc);
+		if(isSlatwallActivated()){
+			var rc = event.getCollection();
+			var page = arguments.interceptData.page;
+			slatwallSyncService.syncContent(page,rc);
+		}
 	}
 
 	/**
 	* Listen to when pages are deleted
 	*/
 	function cbadmin_prePageRemove(event,interceptData) {
-		var rc = event.getCollection();
-		var prc = event.getCollection(private=true);
-		var page = arguments.interceptData.page;
-		slatwallContent =  prc.$.slatwall.getService("contentService").getContentByCMSContentID( page.getContentID() );
-		if(!isNull(slatwallContent)) {
-			if(slatwallContent.isDeletable()) {
-				prc.$.slatwall.getService("contentService").deleteContent( slatwallContent );
-			} else {
-				slatwallContent.setActiveFlag(0);
+		if(isSlatwallActivated()){
+			var rc = event.getCollection();
+			var prc = event.getCollection(private=true);
+			var page = arguments.interceptData.page;
+			slatwallContent =  prc.$.slatwall.getService("contentService").getContentByCMSContentID( page.getContentID() );
+			if(!isNull(slatwallContent)) {
+				if(slatwallContent.isDeletable()) {
+					prc.$.slatwall.getService("contentService").deleteContent( slatwallContent );
+				} else {
+					slatwallContent.setActiveFlag(0);
+				}
 			}
 		}
 	}
@@ -86,45 +91,59 @@ component output="false" {
 
 
 	function cbadmin_pageEditorSidebarAccordion(event,interceptData) {
-		var rc = event.getCollection();
-		var prc = event.getCollection(private=true);
-		if(prc.page.isLoaded()){
-			var slatwallContent = prc.$.slatwall.getService("contentService").getContentByCMSContentIDAndCMSSiteID(prc.page.getContentID(),'1'); //get set dynamically when the time comes
-		} else {
-			var slatwallContent = prc.$.slatwall.getService("contentService").new('SlatwallContent');
-		}
-		var slatwallContentTemplaes = prc.$.slatwall.getContent().getContentTemplateTypeOptions();
-		var selectedContentType = "";
+		if(isSlatwallActivated()){
+			var rc = event.getCollection();
+			var prc = event.getCollection(private=true);
+			if(prc.page.isLoaded()){
+				var slatwallContent = prc.$.slatwall.getService("contentService").getContentByCMSContentIDAndCMSSiteID(prc.page.getContentID(),'1'); //get set dynamically when the time comes
+			} else {
+				var slatwallContent = prc.$.slatwall.getService("contentService").new('SlatwallContent');
+			}
+			var slatwallContentTemplaes = prc.$.slatwall.getContent().getContentTemplateTypeOptions();
+			var selectedContentType = "";
 
-		//set the selectedValue if we have a template
-		if(slatWallContent.hasContentTemplateType()){
-			selectedContentType = slatWallContent.getContentTemplateType().getTypeID();
-		}
+			//set the selectedValue if we have a template
+			if(slatWallContent.hasContentTemplateType()){
+				selectedContentType = slatWallContent.getContentTemplateType().getTypeID();
+			}
 
-		//fix for weird cf issue with the array from slatwall
-		var options = [];
-		for(var item in slatwallContentTemplaes){
-			var s = {name=item["name"],value=item["value"]};
-			arrayAppend(options,s);
-		}
+			//fix for weird cf issue with the array from slatwall
+			var options = [];
+			for(var item in slatwallContentTemplaes){
+				var s = {name=item["name"],value=item["value"]};
+				arrayAppend(options,s);
+			}
 
-		var accordion = '
-            <div class="accordion-group">
-            	<div class="accordion-heading">
-              		<a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="##accordion" href="##slatwallattributes">
-                		<i class="icon-tasks icon-large"></i> Slatwall Attributes
-              		</a>
-            	</div>
-            	<div id="slatwallattributes" class="accordion-body collapse">
-              		<div class="accordion-inner">
-                		#html.checkBox(name="productListingPageFlag",label="Product Listing Page",title="Is this a Slatwall Product Listing Page?",bind=slatWallContent,class="input-block-level")#
-                		#html.select(name="contentTemplateType",label="Page Type",options=options,column="value",nameColumn="name",selectedValue=selectedContentType)#
-              		</div>
-            	</div>
-          	</div>
-		';
-		appendToBuffer( accordion );
+			var accordion = '
+	            <div class="accordion-group">
+	            	<div class="accordion-heading">
+	              		<a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="##accordion" href="##slatwallattributes">
+	                		<i class="icon-tasks icon-large"></i> Slatwall Attributes
+	              		</a>
+	            	</div>
+	            	<div id="slatwallattributes" class="accordion-body collapse">
+	              		<div class="accordion-inner">
+	                		#html.checkBox(name="productListingPageFlag",label="Product Listing Page",title="Is this a Slatwall Product Listing Page?",bind=slatWallContent,class="input-block-level")#
+	                		#html.select(name="contentTemplateType",label="Page Type",options=options,column="value",nameColumn="name",selectedValue=selectedContentType)#
+	              		</div>
+	            	</div>
+	          	</div>
+			';
+			appendToBuffer( accordion );
+		}
 	}
+
+
+	private function getSlatwallModule() {
+		return moduleService.findModuleByEntryPoint('slatwall-coldbox');;
+	}
+
+
+	private function isSlatwallActivated() {
+		var module = getSlatwallModule();
+		return module.getIsActive();
+	}
+
 
 
 
