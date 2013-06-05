@@ -99,18 +99,24 @@ Optional Methods
 				.registerInterceptor(interceptorClass="#moduleMapping#.interceptors.slatwall");
 		}
 
-		//If we haven't synced up the content yet, do it!
-		if(not getSlatwallContentConfigured()) {
-			var slatwallSyncService = controller.getWireBox().getInstance("modules.contentbox.modules.slatwall-coldbox.model.SlatwallSyncService");
-			slatwallSyncService.setupContent();
-		}
-
 		// ContentBox loaded?
 		if( structKeyExists( controller.getSetting("modules"), "contentbox" ) ){
 			// Let's add ourselves to the main menu in the Modules section
 			var menuService = controller.getWireBox().getInstance("AdminMenuService@cb");
 			// Add Menu Contribution
 			menuService.addSubMenu(topMenu=menuService.MODULES,name="Slatwall",label="Slatwall Admin",href="#appMapping#/Slatwall");
+		}
+	}
+
+	/**
+	* Fired when the module is activated by ContentBox Only
+	*/
+	function onActivate(){
+		//If we haven't synced up the content yet, do it!
+		if(not getSlatwallContentConfigured()) {
+			var prc = controller.getRequestService().getContext().getCollection(private=true);
+			var slatwallSyncService = controller.getWireBox().getInstance("modules.contentbox.modules.slatwall-coldbox.model.SlatwallSyncService");
+			slatwallSyncService.setupContent(prc.oAuthor);
 		}
 	}
 

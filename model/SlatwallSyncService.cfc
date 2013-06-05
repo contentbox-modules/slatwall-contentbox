@@ -4,14 +4,13 @@ component output="false" displayname=""  {
 	property name="slatwallContentService" inject="entityService:SlatwallContent";
 	property name="slatwallSiteService" inject="entityService:SlatwallSite";
 	property name="slatwallTypeService" inject="entityService:SlatwallType";
-	property name="authorService" 		inject="authorService@cb";
 	property name="slatwall" inject="id:slatwall";
 
 	public function init(){
 		return this;
 	}
 
-	public function setupContent() {
+	public function setupContent(required author) {
 		//get all the currently published pages from contentbox
 		var content = getPublishedPages();
 		//populate and save Slatwall content with contentbox content
@@ -20,7 +19,7 @@ component output="false" displayname=""  {
 			populateAndSaveContent(sc,c);
 		}
 		//create the slatwall contentbox pages and then create the slatwallContent for them
-		createPages();
+		createPages(arguments.author);
 	}
 
 	public function syncContent(required page, required data) {
@@ -113,12 +112,7 @@ component output="false" displayname=""  {
 		return pages;
 	}
 
-	private function createPages() {
-		var c = authorService.newCriteria();
-		c.createAlias("role","r");
-		c.isEq("r.role","Administrator");
-		var admins = c.list();
-		var author = admins[1];
+	private function createPages(required author) {
 
 		//product listing
 		var productListingPage = pageService.new();
@@ -126,11 +120,11 @@ component output="false" displayname=""  {
 		productListingPage.setTitle('Products');
 		productListingPage.setIsPublished(true);
 		productListingPage.setPublishedDate(now());
-		productListingPage.setCreator(author);
+		productListingPage.setCreator(arguments.author);
 		productListingPage.setLayout('slatwall-productlisting');
 		productListingPage.setCache(false);
 		productListingPage.setCacheLayout(false);
-		productListingPage.addNewContentVersion(content="", changelog="Initial creation",author=author);
+		productListingPage.addNewContentVersion(content="", changelog="Initial creation",author=arguments.author);
 		pageService.savePage( productListingPage, "" );
 		var sc = slatwallContentService.new();
 		sc.setProductListingPageFlag(true);
@@ -142,12 +136,12 @@ component output="false" displayname=""  {
 		productPage.setTitle('Product');
 		productPage.setIsPublished(true);
 		productPage.setPublishedDate(now());
-		productPage.setCreator(author);
+		productPage.setCreator(arguments.author);
 		productPage.setLayout('slatwall-product');
 		productPage.setCache(false);
 		productPage.setCacheLayout(false);
 		productPage.setShowInMenu(false);
-		productPage.addNewContentVersion(content="", changelog="Initial creation",author=author);
+		productPage.addNewContentVersion(content="", changelog="Initial creation",author=arguments.author);
 		pageService.savePage( productPage, "" );
 		var sc = slatwallContentService.new();
 		var type = slatwallTypeService.findWhere({systemCode='cttProduct'});
@@ -167,11 +161,11 @@ component output="false" displayname=""  {
 		cartPage.setTitle('Cart');
 		cartPage.setIsPublished(true);
 		cartPage.setPublishedDate(now());
-		cartPage.setCreator(author);
+		cartPage.setCreator(arguments.author);
 		cartPage.setLayout('slatwall-shoppingcart');
 		cartPage.setCache(false);
 		cartPage.setCacheLayout(false);
-		cartPage.addNewContentVersion(content="", changelog="Initial creation",author=author);
+		cartPage.addNewContentVersion(content="", changelog="Initial creation",author=arguments.author);
 		pageService.savePage( cartPage, "" );
 		var sc = slatwallContentService.new();
 		populateAndSaveContent(sc,cartPage);
@@ -182,11 +176,11 @@ component output="false" displayname=""  {
 		accountPage.setTitle('Account');
 		accountPage.setIsPublished(true);
 		accountPage.setPublishedDate(now());
-		accountPage.setCreator(author);
+		accountPage.setCreator(arguments.author);
 		accountPage.setLayout('slatwall-account');
 		accountPage.setCache(false);
 		accountPage.setCacheLayout(false);
-		accountPage.addNewContentVersion(content="", changelog="Initial creation",author=author);
+		accountPage.addNewContentVersion(content="", changelog="Initial creation",author=arguments.author);
 		pageService.savePage( accountPage, "" );
 		var sc = slatwallContentService.new();
 		populateAndSaveContent(sc,accountPage);
@@ -197,12 +191,12 @@ component output="false" displayname=""  {
 		checkoutPage.setTitle('Checkout');
 		checkoutPage.setIsPublished(true);
 		checkoutPage.setPublishedDate(now());
-		checkoutPage.setCreator(author);
+		checkoutPage.setCreator(arguments.author);
 		checkoutPage.setLayout('slatwall-checkout');
 		checkoutPage.setCache(false);
 		checkoutPage.setCacheLayout(false);
 		checkoutPage.setShowInMenu(false);
-		checkoutPage.addNewContentVersion(content="", changelog="Initial creation",author=author);
+		checkoutPage.addNewContentVersion(content="", changelog="Initial creation",author=arguments.author);
 		pageService.savePage( checkoutPage, "" );
 		var sc = slatwallContentService.new();
 		populateAndSaveContent(sc,checkoutPage);
