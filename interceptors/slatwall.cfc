@@ -20,8 +20,16 @@ component output="false" {
 	*/
 	function cbadmin_prePageRemove(event,interceptData) {
 		var rc = event.getCollection();
+		var prc = event.getCollection(private=true);
 		var page = arguments.interceptData.page;
-		slatwallSyncService.removeContent(page,rc);
+		slatwallContent =  prc.$.slatwall.getService("contentService").getContentByCMSContentID( page.getContentID() );
+		if(!isNull(slatwallContent)) {
+			if(slatwallContent.isDeletable()) {
+				prc.$.slatwall.getService("contentService").deleteContent( slatwallContent );
+			} else {
+				slatwallContent.setActiveFlag(0);
+			}
+		}
 	}
 
 	function cbui_onPageNotFound(event,interceptData) {
@@ -80,7 +88,11 @@ component output="false" {
 	function cbadmin_pageEditorSidebarAccordion(event,interceptData) {
 		var rc = event.getCollection();
 		var prc = event.getCollection(private=true);
-		var slatwallContent = prc.$.slatwall.getService("contentService").getContentByCMSContentIDAndCMSSiteID(prc.page.getContentID(),'1'); //get set dynamically when the time comes
+		if(prc.page.isLoaded()){
+			var slatwallContent = prc.$.slatwall.getService("contentService").getContentByCMSContentIDAndCMSSiteID(prc.page.getContentID(),'1'); //get set dynamically when the time comes
+		} else {
+			var slatwallContent = prc.$.slatwall.getService("contentService").new('SlatwallContent');
+		}
 		var slatwallContentTemplaes = prc.$.slatwall.getContent().getContentTemplateTypeOptions();
 		var selectedContentType = "";
 

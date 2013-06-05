@@ -42,27 +42,6 @@ component output="false" displayname=""  {
 		populateAndSaveContent(sc,arguments.page);
 	}
 
-	public function removeContent(required page, required data) {
-		//manual sql because of hibernate transaction on delete
-		var q1 = new Query();
-		var sql = "update slatwallcontent set parentContentID = null
-					 where contentID in (select sc.contentID from (select contentID from slatwallContent where cmsContentID = :id) as sc );";
-		q1.setSQL(sql);
-		q1.addParam(name="id",value=page.getContentID());
-		q1.execute();
-		var q2 = new Query();
-		var sql = "delete from slatwallproductlistingpage where contentID in (select contentID from slatwallcontent where cmsContentID = :id);";
-		q2.setSQL(sql);
-		q2.addParam(name="id",value=page.getContentID());
-		q2.execute();
-		var q3 = new Query();
-		var sql = "delete from slatwallcontent where cmsContentID = :id";
-		q3.setSQL(sql);
-		q3.addParam(name="id",value=page.getContentID());
-		q3.execute();
-	}
-
-
 	private function populateAndSaveContent(slatwallContent,page) {
 		//get the site object from slatwall
 		var site = getSite();
