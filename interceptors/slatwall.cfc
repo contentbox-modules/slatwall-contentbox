@@ -45,30 +45,37 @@ component output="false" {
 
 		// Setup the correct local in the request object for the current site
 		//$.slatwall.setRBLocale( getfwLocale() );  //broken because CB doesn't do this yet fix when locales are ready
-
 		// Inspect the path looking for slatwall URL key, and then setup the proper objects in the slatwallScope
 		var brandKeyLocation = 0;
 		var productKeyLocation = 0;
 		var productTypeKeyLocation = 0;
 
 		// Inspect the rc looking for slatwall URL key, and then setup the proper objects in the slatwallScope
-		if (event.valueExists( $.slatwall.setting('globalURLKeyBrand') )) {
+		if (event.valueExists( $.slatwall.setting('globalURLKeyBrand') ) || rc.pageSlug == $.slatwall.setting('globalURLKeyBrand') ) {
+			if(!event.valueExists( $.slatwall.setting('globalURLKeyBrand') )){
+				prepareRC(event,rc,$,'globalURLKeyBrand');
+			}
 			brandKeyLocation = listFindNoCase(event.getCurrentRoutedURL(), $.slatwall.setting('globalURLKeyBrand'), "/");
 			title = event.getValue( $.slatwall.setting('globalURLKeyBrand') );
 			$.slatwall.setBrand( $.slatwall.getService("brandService").getBrandByURLTitle( title ) );
 		}
-		if (event.valueExists( $.slatwall.setting('globalURLKeyProduct') )) {
+		if (event.valueExists( $.slatwall.setting('globalURLKeyProduct') ) || rc.pageSlug == $.slatwall.setting('globalURLKeyProduct') ) {
+			if(!event.valueExists( $.slatwall.setting('globalURLKeyProduct') )){
+				prepareRC(event,rc,$,'globalURLKeyProduct');
+			}
 			productKeyLocation = listFindNoCase(event.getCurrentRoutedURL(), $.slatwall.setting('globalURLKeyProduct'), "/");
 			title = event.getValue( $.slatwall.setting('globalURLKeyProduct') );
 			$.slatwall.setProduct( $.slatwall.getService("productService").getProductByURLTitle( title ) );
 		}
-		if (event.valueExists( $.slatwall.setting('globalURLKeyProductType') )) {
+		if (event.valueExists( $.slatwall.setting('globalURLKeyProductType') ) || rc.pageSlug == $.slatwall.setting('globalURLKeyProductType') ) {
+			if(!event.valueExists( $.slatwall.setting('globalURLKeyProductType') )){
+				prepareRC(event,rc,$,'globalURLKeyProductType');
+			}
 			productTypeKeyLocation = listFindNoCase(event.getCurrentRoutedURL(), $.slatwall.setting('globalURLKeyProductType'), "/");
 			title = event.getValue( $.slatwall.setting('globalURLKeyProductType') );
 			$.slatwall.setProductType( $.slatwall.getService("productService").getProductTypeByURLTitle( title ) );
 		}
 		if(len(title)){
-
 			if( productKeyLocation && productKeyLocation > productTypeKeyLocation && productKeyLocation > brandKeyLocation && !$.slatwall.getCurrentProduct().isNew() && $.slatwall.getCurrentProduct().getActiveFlag() && ($.slatwall.getCurrentProduct().getPublishedFlag() || $.slatwall.getCurrentProduct().setting('productShowDetailWhenNotPublishedFlag'))) {
 				$.slatwall.setContent($.slatwall.getService("contentService").getContent($.slatwall.getCurrentProduct().setting('productDisplayTemplate', [$.slatwall.getSite()])));
 			} else if ( productTypeKeyLocation && productTypeKeyLocation > brandKeyLocation && !$.slatwall.getCurrentProductType().isNew() && $.slatwall.getCurrentProductType().getActiveFlag() ) {
@@ -135,13 +142,17 @@ component output="false" {
 
 
 	private function getSlatwallModule() {
-		return moduleService.findModuleByEntryPoint('slatwall-coldbox');;
+		return moduleService.findModuleByEntryPoint('slatwall-coldbox');
 	}
 
 
 	private function isSlatwallActivated() {
 		var module = getSlatwallModule();
 		return module.getIsActive();
+	}
+
+	private function prepareRC(event,rc,$,URLKey) {
+		rc[$.slatwall.setting(arguments.URLKey)] = replace(replaceNoCase(event.getCurrentRoutedURL(), $.slatwall.setting(arguments.URLKey), ""),"/","","all");
 	}
 
 
