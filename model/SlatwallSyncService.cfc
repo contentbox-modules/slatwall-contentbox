@@ -112,7 +112,7 @@ component output="false" displayname=""  {
 		//product
 		var productPage = pageService.new();
 		productPage.setSlug('product');
-		productPage.setTitle('Product');
+		productPage.setTitle('Product Template');
 		productPage.setIsPublished(true);
 		productPage.setPublishedDate(now());
 		productPage.setCreator(arguments.author);
