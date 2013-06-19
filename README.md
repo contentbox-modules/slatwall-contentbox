@@ -1,4 +1,4 @@
-slatwall-coldbox
+Slatwall eCommerce For ContentBox
 ================
 
-Coldbox Module to connect Slatwall eCommerce
+ContentBox Module to connect to Slatwall eCommerce
