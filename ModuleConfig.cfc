@@ -108,6 +108,19 @@ Optional Methods
 		}
 	}
 
+		/**
+	* Fired when the module is unregistered and unloaded
+	*/
+	function onUnload(){
+		// ContentBox unloading
+		if( structKeyExists( controller.getSetting("modules"), "contentbox" ) ){
+			// Let's remove ourselves to the main menu in the Modules section
+			var menuService = controller.getWireBox().getInstance("AdminMenuService@cb");
+			// Remove Menu Contribution
+			menuService.removeSubMenu(topMenu=menuService.MODULES,name="Slatwall");
+		}
+	}
+
 	/**
 	* Fired when the module is activated by ContentBox Only
 	*/
