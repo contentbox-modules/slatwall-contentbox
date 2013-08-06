@@ -14,12 +14,12 @@
 		<cfif not directoryExists(slatwallDirectoryPath)>
 
 			<!--- start download --->
-			<cfhttp url="https://github.com/ten24/Slatwall/archive/rc3.zip" method="get" path="#getTempDirectory()#" file="slatwall.zip" />
+			<cfhttp url="https://github.com/ten24/Slatwall/archive/master.zip" method="get" path="#getTempDirectory()#" file="slatwall.zip" />
 
 			<!--- Unzip downloaded file --->
 			<cfset var slatwallZipDirectoryList = "" />
 			<cfzip action="unzip" destination="#arguments.appPath#" file="#getTempDirectory()#slatwall.zip" >
-			<cfdirectory action="rename" directory="#arguments.appPath#/Slatwall-rc3" newdirectory="#arguments.appPath#/Slatwall" />
+			<cfdirectory action="rename" directory="#arguments.appPath#/Slatwall-master" newdirectory="#arguments.appPath#/Slatwall" />
 			<!--- Set Application Datasource in custom Slatwall config --->
 			<cffile action="write" file="#slatwallDirectoryPath#/custom/config/configApplication.cfm" output='
 				<cfset this.name = "#arguments.applicationName#" />#chr(13)#
