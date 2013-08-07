@@ -1,7 +1,6 @@
 *.project
 *.settings
 *.DS_Store
-*.zip
 *.lic
 *.pfx
 _notes/
