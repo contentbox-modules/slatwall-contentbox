@@ -18,10 +18,13 @@ ContentBox 1.5 or newer
 Installation
 ------------
 
+Easy Installation from Forgbox.  Just go to your modules panel in your ContentBox admin and install from there.
+
+or
+
 Drop into you ContentBox modules folder localed at %root%/modules/contentbox/modules directory.  The directory should 
 be named slatwall-contentbox.  
 
-Coming soon...Easy Installation from Forgbox.
 
 Notes
 ------------
