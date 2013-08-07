@@ -22,7 +22,7 @@ Easy Installation from Forgbox.  Just go to your modules panel in your ContentBo
 
 or
 
-Drop into you ContentBox modules folder localed at %root%/modules/contentbox/modules directory.  The directory should 
+Drop into you ContentBox modules folder located at %root%/modules/contentbox/modules directory.  The directory should 
 be named slatwall-contentbox.  
 
 
