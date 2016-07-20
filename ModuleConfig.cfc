@@ -1,53 +1,11 @@
 component hint="My Module Configuration"{
-/**
-Module Directives as public properties
-this.title 				= "Title of the module";
-this.author 			= "Author of the module";
-this.webURL 			= "Web URL for docs purposes";
-this.description 		= "Module description";
-this.version 			= "Module Version"
-
-Optional Properties
-this.viewParentLookup   = (true) [boolean] (Optional) // If true, checks for views in the parent first, then it the module.If false, then modules first, then parent.
-this.layoutParentLookup = (true) [boolean] (Optional) // If true, checks for layouts in the parent first, then it the module.If false, then modules first, then parent.
-this.entryPoint  		= "" (Optional) // If set, this is the default event (ex:forgebox:manager.index) or default route (/forgebox) the framework
-									       will use to create an entry link to the module. Similar to a default event.
-
-structures to create for configuration
-- parentSettings : struct (will append and override parent)
-- settings : struct
-- datasources : struct (will append and override parent)
-- webservices : struct (will append and override parent)
-- interceptorSettings : struct of the following keys ATM
-	- customInterceptionPoints : string list of custom interception points
-- interceptors : array
-- layoutSettings : struct (will allow to define a defaultLayout for the module)
-- routes : array Allowed keys are same as the addRoute() method of the SES interceptor.
-- wirebox : The wirebox DSL to load and use
-
-Available objects in variable scope
-- controller
-- appMapping (application mapping)
-- moduleMapping (include,cf path)
-- modulePath (absolute path)
-- log (A pre-configured logBox logger object for this object)
-- binder (The wirebox configuration binder)
-
-Required Methods
-- configure() : The method ColdBox calls to configure the module.
-
-Optional Methods
-- onLoad() 		: If found, it is fired once the module is fully loaded
-- onUnload() 	: If found, it is fired once the module is unloaded
-
-*/
 
 	// Module Properties
 	this.title 				= "Slatwall Connector";
 	this.author 			= "ten24 Web Solutions";
 	this.webURL 			= "http://www.getslatwall.com";
 	this.description 		= "This is a connector application for Slatwall";
-	this.version			= "1.0";
+	this.version			= "2.0.0";
 	// If true, looks for views in the parent first, if not found, then in the module. Else vice-versa
 	this.viewParentLookup 	= true;
 	// If true, looks for layouts in the parent first, if not found, then in module. Else vice-versa
@@ -57,11 +15,10 @@ Optional Methods
 
 	this.slatwallInstalled	= false;
 	this.slatwallConfigured	= false;
-	this.slatwall = "";
+	this.slatwall 			= "";
 
 	function configure(){
 	}
-
 
 	/**
 	* Fired when the module is registered and activated.
@@ -76,14 +33,14 @@ Optional Methods
 				var ds = appMeta.datasource;
 			}
 			//get the ContentBox Layout service
-			var layoutService = controller.getWireBox().getInstance('layoutService@cb');
+			var layoutService = wirebox.getInstance('layoutService@cb');
 			var layoutPath = '';
 			//if we are in ContentBox, this won't be null, so now we know
 			if (!isNull(layoutService)) {
 				var layout = LayoutService.getActiveLayout();
 				layoutPath = "#layout.directory#/#layout.name#/";
 			}
-			var slatwallSetup = new model.SlatwallSetup();
+			var slatwallSetup = new models.SlatwallSetup();
 			slatwallSetup.setupSlatwall(appPath=expandPath('/'), applicationName=appMeta.name, applicationDatasource=ds, layoutPath=layoutPath);
 
 		}
@@ -92,7 +49,7 @@ Optional Methods
 		if(getSlatwallInstalledFlag()) {
 			binder.map("slatwall").toValue(new Slatwall.Application()).asSingleton();
 			//setup the wirebox mapping and bootstrap
-			var slatwall = controller.getWireBox().getInstance("slatwall");
+			var slatwall = wirebox.getInstance("slatwall");
 			slatwall.bootstrap();
 			// register the interceptor to listen to all events declared
 			controller.getInterceptorService()
@@ -102,7 +59,7 @@ Optional Methods
 		// ContentBox loaded?
 		if( structKeyExists( controller.getSetting("modules"), "contentbox" ) ){
 			// Let's add ourselves to the main menu in the Modules section
-			var menuService = controller.getWireBox().getInstance("AdminMenuService@cb");
+			var menuService = wirebox.getInstance("AdminMenuService@cb");
 			// Add Menu Contribution
 			menuService.addSubMenu(topMenu=menuService.MODULES,name="Slatwall",label="Slatwall Admin",href="#appMapping#/Slatwall");
 		}
@@ -115,7 +72,7 @@ Optional Methods
 		// ContentBox unloading
 		if( structKeyExists( controller.getSetting("modules"), "contentbox" ) ){
 			// Let's remove ourselves to the main menu in the Modules section
-			var menuService = controller.getWireBox().getInstance("AdminMenuService@cb");
+			var menuService = wirebox.getInstance("AdminMenuService@cb");
 			// Remove Menu Contribution
 			menuService.removeSubMenu(topMenu=menuService.MODULES,name="Slatwall");
 		}
@@ -128,7 +85,7 @@ Optional Methods
 		//If we haven't synced up the content yet, do it!
 		if(not getSlatwallContentConfigured()) {
 			var prc = controller.getRequestService().getContext().getCollection(private=true);
-			var slatwallSyncService = controller.getWireBox().getInstance("modules.contentbox.modules.slatwall-coldbox.model.SlatwallSyncService");
+			var slatwallSyncService = wirebox.getInstance("modules.contentbox.modules.slatwall-coldbox.models.SlatwallSyncService");
 			slatwallSyncService.setupContent(prc.oAuthor);
 		}
 	}
@@ -136,7 +93,7 @@ Optional Methods
 	function preProcess( required any event, required struct interceptData  ) {
 		if(getSlatwallConfiguredFlag() && getSlatwallInstalledFlag()) {
 
-			var slatwall = controller.getWireBox().getInstance("slatwall");
+			var slatwall = wirebox.getInstance("slatwall");
 
 			var prc = event.getCollection(private=true);
 			var rc = event.getCollection();
@@ -165,23 +122,23 @@ Optional Methods
 	/*
 	* Renderer helper injection
 	*/
-	function afterPluginCreation(event,interceptData){
+	function afterInstanceCreation(event,interceptData){
 
 		if(getSlatwallConfiguredFlag() && getSlatwallInstalledFlag()) {
 			var prc = event.getCollection(private=true);
 
 			// check for renderer
-			if( isInstanceOf(arguments.interceptData.oPlugin,"coldbox.system.plugins.Renderer") ){
-				var slatwall = controller.getWireBox().getInstance("slatwall");
+			if( isInstanceOf(arguments.interceptData.target,"coldbox.system.web.Renderer") ){
+				var slatwall = wirebox.getInstance("slatwall");
 
-				if(!structKeyExists(arguments.interceptData.oPlugin, "$")) {
-					arguments.interceptData.oPlugin.$ = {};
+				if(!structKeyExists(arguments.interceptData.target, "$")) {
+					arguments.interceptData.target.$ = {};
 				}
 
 				// decorate it
-				arguments.interceptData.oPlugin.$.slatwall = request.slatwallScope;
-				arguments.interceptData.oPlugin.$slatwallInject = variables.$slatwallInject;
-				arguments.interceptData.oPlugin.$slatwallInject();
+				arguments.interceptData.target.$.slatwall = request.slatwallScope;
+				arguments.interceptData.target.$slatwallInject = variables.$slatwallInject;
+				arguments.interceptData.target.$slatwallInject();
 
 			}
 		}
@@ -194,7 +151,6 @@ Optional Methods
 	function $slatwallInject(){
 		variables.$ = this.$;
 	}
-
 
 	private struct function getAppMeta() {
 		if( listFirst(server.coldfusion.productVersion,",") gte 10 ){
@@ -226,11 +182,10 @@ Optional Methods
 	}
 
 	private boolean function getSlatwallContentConfigured() {
-		var slatwall = controller.getWireBox().getInstance("slatwall");
+		var slatwall = wirebox.getInstance("slatwall");
 		slatwall.bootstrap();
 		var content = entityLoad('SlatwallContent',{},{maxResults=1});
 		return arrayLen(content);
 	}
-
 
 }

@@ -10,9 +10,9 @@ ContentBox Module to connect to Slatwall eCommerce
 Requirements
 ------------
 
-Railo version 4.1 or newer
+Lucee 4.5 +
 Adobe Coldfusion 9.01 or newer
-ContentBox 1.5 or newer
+ContentBox 3+
 
 
 Installation

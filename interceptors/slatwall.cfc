@@ -1,11 +1,11 @@
 component output="false" {
 
 	//DI
-	property name="slatwall" inject="id:slatwall";
-	property name="slatwallSyncService" inject="id:modules.contentbox.modules.slatwall-coldbox.model.SlatwallSyncService";
-	property name="pageService" inject="id:pageService@cb";
-	property name="html" inject="coldbox:plugin:htmlHelper";
-	property name="moduleService"	inject="id:moduleService@cb";
+	property name="slatwall" 			inject="id:slatwall";
+	property name="slatwallSyncService" inject="id:modules.contentbox.modules.slatwall-coldbox.models.SlatwallSyncService";
+	property name="pageService" 		inject="id:pageService@cb";
+	property name="html" 				inject="HTMLHelper@coldbox";
+	property name="moduleService"		inject="id:moduleService@cb";
 
 	/**
 	* Listen to when pages are saved, then call our service to sync the content
@@ -91,8 +91,8 @@ component output="false" {
 			var isMobileDevice = mobileDetector.isMobile();
 			var thisLayout = ( isMobileDevice ? prc.page.getMobileLayoutWithInheritance() : prc.page.getLayoutWithInheritance() );
 			// set skin view
-			event.setLayout(name="#prc.cbLayout#/layouts/#thisLayout#", module="contentbox")
-			.setView(view="#prc.cbLayout#/views/page", module="contentbox");
+			event.setLayout(name="#prc.cbTheme#/layouts/#thisLayout#", module="contentbox")
+			.setView(view="#prc.cbTheme#/views/page", module="contentbox");
 		}
 	}
 

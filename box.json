@@ -1,0 +1,36 @@
+{
+    "name":"ContentBox Slatwall Connector",
+    "shortDescription":"Allows your ContentBox installation to connect to Slatwall for eCommerce capabilties",
+    "location":"https://github.com/contentbox-modules/slatwall-contentbox/archive/master.zip",
+    "version":"2.0.0",
+    "slug":"ContentBox-Slatwall-Connector",
+    "author":"Curt Gratz + Ortus Solutions <info@ortussolutions.com>",
+    "homepage":"https://github.com/contentbox-modules/slatwall-contentbox",
+    "documentation":"https://github.com/contentbox-modules/slatwall-contentbox",
+    "repository":{
+        "type":"git",
+        "url":"https://github.com/contentbox-modules/slatwall-contentbox"
+    },
+    "bugs":"https://github.com/contentbox-modules/slatwall-contentbox/issues",
+    "type":"contentbox-modules",
+    "license":[
+        {
+            "type":"Apache2",
+            "url":"http://www.apache.org/licenses/LICENSE-2.0.html"
+        }
+    ],
+    "contributors":[
+        
+    ],
+    "dependencies":{
+    },
+    "devDependencies":{
+        
+    },
+    "installPaths":{
+    },
+    "ignore":[
+        "**/.*",
+        "tests"
+    ]
+}
