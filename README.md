@@ -1,5 +1,4 @@
-Slatwall eCommerce For ContentBox
-================
+Slatwall eCommerce For ContentBox CMS
 
 Introduction
 ------------
