@@ -33,11 +33,11 @@ component hint="My Module Configuration"{
 				var ds = appMeta.datasource;
 			}
 			//get the ContentBox Layout service
-			var layoutService = wirebox.getInstance('layoutService@cb');
+			var ThemeService = wirebox.getInstance('ThemeService@cb');
 			var layoutPath = '';
 			//if we are in ContentBox, this won't be null, so now we know
-			if (!isNull(layoutService)) {
-				var layout = LayoutService.getActiveLayout();
+			if (!isNull(ThemeService)) {
+				var layout = ThemeService.getActiveLayout();
 				layoutPath = "#layout.directory#/#layout.name#/";
 			}
 			var slatwallSetup = new models.SlatwallSetup();
