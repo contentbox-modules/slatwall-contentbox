@@ -37,8 +37,8 @@ component hint="My Module Configuration"{
 			var layoutPath = '';
 			//if we are in ContentBox, this won't be null, so now we know
 			if (!isNull(ThemeService)) {
-				var layout = ThemeService.getActiveLayout();
-				layoutPath = "#layout.directory#/#layout.name#/";
+				var theme = ThemeService.getActiveTheme();
+				layoutPath = "#theme.directory#/#theme.name#/";
 			}
 			var slatwallSetup = new models.SlatwallSetup();
 			slatwallSetup.setupSlatwall(appPath=expandPath('/'), applicationName=appMeta.name, applicationDatasource=ds, layoutPath=layoutPath);

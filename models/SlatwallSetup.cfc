@@ -7,6 +7,8 @@
 		<cfargument name="layoutPath" type="string" required="true">
 
 
+		<cfsetting requesttimeout=300/>
+
 		<!--- Define what the Slatwall directory will be --->
 		<cfset var slatwallDirectoryPath = "#arguments.appPath#/Slatwall" />
 
